@@ -1,0 +1,601 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>流暢 — Fluency in 4 Months</title>
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#0f0f0f">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="流暢">
+<link rel="apple-touch-icon" href="icon-512.svg">
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;700&family=Noto+Serif+JP:wght@400;700&family=Inter:wght@300;400;500;600&display=swap');
+:root{--ink:#0f0f0f;--paper:#f7f4ef;--red:#c0392b;--red-dim:#8b2a1f;--g1:#1c1c1c;--g2:#2e2e2e;--g3:#5a5a5a;--g4:#9a9a9a;--g5:#d8d5d0;--st:env(safe-area-inset-top,44px);--sb:env(safe-area-inset-bottom,34px)}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+html,body{height:100%;width:100%;overflow:hidden;background:var(--ink);font-family:'Inter',sans-serif;color:var(--paper);-webkit-font-smoothing:antialiased}
+#app{position:fixed;inset:0;display:flex;flex-direction:column;max-width:430px;margin:0 auto;background:var(--ink);overflow:hidden}
+.screen{position:absolute;inset:0;display:flex;flex-direction:column;opacity:0;pointer-events:none;transition:opacity .25s}
+.screen.active{opacity:1;pointer-events:all}
+#home{padding:calc(var(--st) + 16px) 22px calc(var(--sb) + 80px);overflow-y:auto}
+.home-hdr{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:26px}
+.logo-jp{font-family:'Noto Serif JP',serif;font-size:32px;color:var(--red);line-height:1}
+.logo-sub{font-size:10px;font-weight:500;letter-spacing:.18em;text-transform:uppercase;color:var(--g4);margin-top:5px}
+.goal-chip{background:var(--g2);border-radius:20px;padding:5px 11px;font-size:11px;color:var(--g4)}
+.goal-chip span{color:var(--paper);font-weight:600}
+.wk-sec{margin-bottom:22px}
+.wk-lbl{font-size:10px;font-weight:600;letter-spacing:.2em;text-transform:uppercase;color:var(--red);margin-bottom:6px;display:flex;align-items:center;gap:8px}
+.wk-lbl-line{flex:1;height:1px;background:var(--g2)}
+.wk-desc{font-size:12px;color:var(--g4);margin-bottom:10px;line-height:1.5}
+.day-list{display:flex;flex-direction:column;gap:3px}
+.dc{background:var(--g1);border-radius:11px;padding:14px 16px;display:flex;align-items:center;gap:12px;cursor:pointer;border:1px solid transparent;transition:border-color .2s,background .2s;position:relative;overflow:hidden}
+.dc:active{background:var(--g2)}.dc.today{border-color:var(--red)}.dc.done{opacity:.5}
+.dn{font-family:'Noto Serif JP',serif;font-size:20px;color:var(--g3);min-width:28px;line-height:1}
+.dc.today .dn{color:var(--red)}
+.di{flex:1}.dt{font-size:13px;font-weight:600;color:var(--paper);margin-bottom:2px}.ds{font-size:11px;color:var(--g4)}
+.db{width:21px;height:21px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:10px;flex-shrink:0}
+.done-b{background:var(--red);color:#fff}.today-b{border:1.5px solid var(--red);color:var(--red);font-size:9px;font-weight:700}.lock-b{color:var(--g3)}
+.today-pill{position:absolute;top:6px;right:6px;background:var(--red);color:#fff;font-size:9px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;padding:2px 6px;border-radius:8px}
+.home-cta{position:fixed;bottom:calc(var(--sb) + 12px);left:50%;transform:translateX(-50%);width:calc(100% - 44px);max-width:386px;background:var(--red);color:#fff;border:none;border-radius:14px;padding:16px;font-family:'Inter',sans-serif;font-size:15px;font-weight:600;cursor:pointer;transition:background .2s;z-index:10}
+.home-cta:active{background:var(--red-dim)}
+.day-nav{display:flex;align-items:center;justify-content:space-between;padding:calc(var(--st) + 10px) 14px 10px;border-bottom:1px solid var(--g2);flex-shrink:0}
+.nav-back{background:none;border:none;color:var(--g4);font-size:22px;cursor:pointer;padding:4px 8px 4px 0;line-height:1}
+.nav-title{font-family:'Noto Serif JP',serif;font-size:14px;color:var(--paper);text-align:center;flex:1;line-height:1.3}
+.nav-tog{display:flex;background:var(--g2);border-radius:8px;padding:3px;gap:2px}
+.mb{background:none;border:none;font-family:'Inter',sans-serif;font-size:11px;font-weight:600;color:var(--g4);padding:5px 9px;border-radius:5px;cursor:pointer;transition:all .2s;letter-spacing:.03em}
+.mb.active{background:var(--red);color:#fff}
+.day-content{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch}
+.lp{padding:18px 18px 100px}
+.lhero{background:var(--g1);border-radius:14px;padding:18px;margin-bottom:18px;border-left:3px solid var(--red)}
+.lnum{font-family:'Noto Serif JP',serif;font-size:44px;color:var(--red);line-height:1;margin-bottom:5px}
+.ltitle{font-size:18px;font-weight:700;color:var(--paper);margin-bottom:3px;line-height:1.3}
+.ljp{font-family:'Noto Sans JP',sans-serif;font-size:12px;color:var(--g4)}
+.wtag{display:inline-block;background:var(--g2);border-radius:10px;padding:3px 8px;font-size:10px;font-weight:600;color:var(--g4);letter-spacing:.08em;text-transform:uppercase;margin-bottom:12px}
+.blbl{font-size:10px;font-weight:600;letter-spacing:.18em;text-transform:uppercase;color:var(--red);margin-bottom:7px}
+.bbody{font-size:13px;line-height:1.75;color:var(--g5)}
+.lb{margin-bottom:18px}
+.pc{background:var(--g1);border-radius:10px;padding:12px 14px;margin-bottom:6px}
+.pjp{font-family:'Noto Sans JP',sans-serif;font-size:16px;color:var(--paper);margin-bottom:3px}
+.pr{font-size:11px;color:var(--g4);margin-bottom:1px}.pen{font-size:11px;color:var(--g3)}
+.dnb{background:#1a0a09;border:1px solid #3d1410;border-radius:12px;padding:13px;display:flex;gap:9px;align-items:flex-start}
+.dni{font-size:17px;flex-shrink:0;margin-top:1px}.dnt{font-size:13px;color:#e07060;line-height:1.6}
+.crb{background:#091209;border:1px solid #1a3d1a;border-radius:12px;padding:13px}
+.crt{font-size:13px;color:#5ec45e;line-height:1.65}
+.crck{width:100%;margin-top:11px;background:#1a3d1a;border:none;border-radius:10px;color:#5ec45e;font-family:'Inter',sans-serif;font-size:13px;font-weight:600;padding:10px;cursor:pointer;transition:background .2s}
+.crck:active,.crck.ck{background:#2a5d2a}
+.chat-panel{display:flex;flex-direction:column;height:100%;position:relative}
+.chat-bar{background:var(--g1);border-bottom:1px solid var(--g2);padding:8px 13px;font-size:11px;color:var(--g4);display:flex;align-items:center;gap:6px;flex-shrink:0}
+.cdot{width:5px;height:5px;background:var(--red);border-radius:50%}
+.chat-msgs{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:13px;display:flex;flex-direction:column;gap:9px;padding-bottom:200px}
+.msg{max-width:88%;border-radius:16px;padding:10px 13px;font-size:14px;line-height:1.6}
+.msg.ai{background:var(--g1);color:var(--paper);align-self:flex-start;border-bottom-left-radius:4px}
+.msg.user{background:var(--red);color:#fff;align-self:flex-end;border-bottom-right-radius:4px}
+.msg.sys{background:none;color:var(--g4);font-size:11px;text-align:center;align-self:center;max-width:100%;font-style:italic;padding:2px 0}
+.typing{align-self:flex-start;background:var(--g1);border-radius:16px;border-bottom-left-radius:4px;padding:12px 15px;display:none}
+.typing.vis{display:flex;gap:4px;align-items:center}
+.dot{width:5px;height:5px;background:var(--g4);border-radius:50%;animation:bounce 1.2s infinite}
+.dot:nth-child(2){animation-delay:.2s}.dot:nth-child(3){animation-delay:.4s}
+@keyframes bounce{0%,60%,100%{transform:translateY(0)}30%{transform:translateY(-5px)}}
+.vc{position:absolute;bottom:0;left:0;right:0;background:linear-gradient(transparent,var(--ink) 28%);padding:14px 16px calc(var(--sb) + 10px);display:flex;flex-direction:column;align-items:center;gap:10px}
+.vstatus{font-size:12px;color:var(--g4);letter-spacing:.04em;min-height:17px;text-align:center}
+.vstatus.ls{color:var(--red);animation:pt 1.5s infinite}.vstatus.sp{color:#5ec45e}
+@keyframes pt{0%,100%{opacity:1}50%{opacity:.4}}
+.vrow{display:flex;align-items:center;gap:14px}
+.mic-btn{width:68px;height:68px;border-radius:50%;background:var(--red);border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .2s;flex-shrink:0;box-shadow:0 4px 18px rgba(192,57,43,.4)}
+.mic-btn:active{transform:scale(.93)}
+.mic-btn.listening{background:#e74c3c;animation:mp 1.5s infinite}
+.mic-btn.speaking{background:var(--g2);box-shadow:none}
+@keyframes mp{0%,100%{box-shadow:0 0 0 0 rgba(192,57,43,.4),0 4px 18px rgba(192,57,43,.3)}70%{box-shadow:0 0 0 14px rgba(192,57,43,0),0 4px 18px rgba(192,57,43,.3)}}
+.mic-icon{font-size:26px;line-height:1}
+.vtog{background:var(--g2);border:none;border-radius:18px;padding:7px 13px;color:var(--g4);font-family:'Inter',sans-serif;font-size:11px;font-weight:500;cursor:pointer;transition:all .2s;white-space:nowrap}
+.vtog:active{background:var(--g3)}
+.ti-row{display:flex;gap:7px;width:100%;align-items:flex-end}
+.ci{flex:1;background:var(--g2);border:none;border-radius:18px;padding:9px 14px;color:var(--paper);font-family:'Inter',sans-serif;font-size:14px;outline:none;resize:none;max-height:80px;line-height:1.4}
+.ci::placeholder{color:var(--g3)}
+.sb{width:38px;height:38px;background:var(--red);border:none;border-radius:50%;color:#fff;font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:background .2s}
+.sb:active{background:var(--red-dim)}.sb:disabled{background:var(--g3)}
+::-webkit-scrollbar{width:0}
+</style>
+</head>
+<body>
+<div id="app">
+<div id="home" class="screen active">
+  <div class="home-hdr">
+    <div><div class="logo-jp">流暢</div><div class="logo-sub">Fluency · 4 Months</div></div>
+    <div class="goal-chip">Oct <span>mid</span> → Japan</div>
+  </div>
+  <div id="wk-sections"></div>
+  <button class="home-cta" id="start-btn">Begin Today's Session →</button>
+</div>
+<div id="day-screen" class="screen">
+  <div class="day-nav">
+    <button class="nav-back" id="back-btn">‹</button>
+    <div class="nav-title" id="nav-title"></div>
+    <div class="nav-tog">
+      <button class="mb active" id="lbtn" onclick="switchMode('lesson')">Lesson</button>
+      <button class="mb" id="pbtn" onclick="switchMode('speak')">Speak</button>
+    </div>
+  </div>
+  <div class="day-content" id="day-content"></div>
+</div>
+</div>
+<script>
+const WEEKS=[
+  {n:1,label:'Week 1 — Break the Freeze',desc:'Stop thinking, start speaking. Every session forces immediate output. The freeze reflex ends here.'},
+  {n:2,label:'Week 2 — Build the Engine',desc:'Verbs, particles, tenses, numbers. The grammar that generates unlimited sentences.'},
+  {n:3,label:'Week 3 — Real Japan',desc:'Trains, restaurants, hotels, shopping, health. Domain fluency for every situation you\'ll actually face.'},
+  {n:4,label:'Week 4 — Pressure Test',desc:'Fast, unpredictable, no safety net. October simulation until you\'re ready.'},
+];
+
+const DAYS=[
+  {w:1,n:'一',t:'3-Second Rule',jp:'３秒ルール',s:'45 min · Kill the freeze reflex',
+  task:'The freeze comes from trying to be correct before speaking. Today you break that permanently. Rule: every response must leave your mouth within 3 seconds — wrong, broken, half-Japanese is fine. Open Speak and respond to every prompt immediately. If you don\'t know a word, describe around it or say the English. Speed over accuracy. 40 minutes of this, non-stop.',
+  phrases:[{j:'えーと…',r:'Ēto…',e:'Umm… — use while thinking, never go silent'},
+  {j:'なんていうんですか？',r:'Nan te iun desu ka?',e:'How do you say…? — ask rather than freeze'},
+  {j:'つまり…',r:'Tsumari…',e:'I mean… / In other words…'},
+  {j:'ちょっとまってください',r:'Chotto matte kudasai',e:'Just a moment — buys you 3 seconds'}],
+  crit:'You responded to 20 consecutive prompts without a pause longer than 5 seconds. Wrong answers count. Silence does not.',
+  dont:'Do not stop to look up words. Do not apologise for errors. Silence for more than 5 seconds is a failure.',
+  sc:`You are breaking someone's freeze reflex. Rapid-fire ultra-simple prompts in Japanese — one at a time, maximum 5 second wait. If they freeze, immediately give the phrase and move on. Never dwell. Prompts: greetings, name, where from, do you like X, what's this. Start now with your first prompt.`},
+
+  {w:1,n:'二',t:'Survival Chunks',jp:'生存フレーズ',s:'45 min · 20 phrases as muscle memory',
+  task:'20 phrases cover 80% of Japan situations. Don\'t read them — say them until they\'re automatic. For each phrase: hear it, repeat it 5 times, use it in a live scenario. All spoken. The Speak session runs you through 20 real situations and you must respond in Japanese within 3 seconds.',
+  phrases:[{j:'すみません',r:'Sumimasen',e:'Excuse me — use for everything'},
+  {j:'これをください',r:'Kore o kudasai',e:'I\'ll have this please'},
+  {j:'いくらですか？',r:'Ikura desu ka?',e:'How much?'},
+  {j:'もう一度おねがいします',r:'Mō ichido onegai shimasu',e:'Please say that again'},
+  {j:'わかりません',r:'Wakarimasen',e:'I don\'t understand'}],
+  crit:'Your tutor says 20 situations in English. You respond in Japanese within 3 seconds. 16/20 correct — pass.',
+  dont:'Do not study these as a reading list. Phrases become automatic through speaking, not reading.',
+  sc:`Run survival phrase drills. Call out Japan situations in English one at a time. Wait for their Japanese response. Right: say いいですね and move on. Wrong or freeze: give the phrase, have them repeat, move on. Track score and report at end. 20 situations total.`},
+
+  {w:1,n:'三',t:'Sound Like Japanese',jp:'日本語らしく',s:'45 min · Rhythm, pitch and filler words',
+  task:'Japanese sounds completely different from English — flat pitch, short sounds, no stress accent. Today focus entirely on how you sound, not what you say. Shadow the AI: listen to a phrase, repeat immediately mimicking the exact rhythm. Use filler words (えーと、そうですね、あのう) to sound natural when thinking. Copy the sound pattern, don\'t translate.',
+  phrases:[{j:'そうですね',r:'Sō desu ne',e:'I see / That\'s right — use when processing'},
+  {j:'あのう…',r:'Anō…',e:'Umm / Well… — natural thinking filler'},
+  {j:'なるほど',r:'Naruhodo',e:'I see / Makes sense'},
+  {j:'ほんとうですか？',r:'Hontō desu ka?',e:'Really? — keeps conversation alive'}],
+  crit:'Say 5 sentences and listen back. Flat, even rhythm with no English stress. If it sounds Japanese — pass.',
+  dont:'Do not worry about grammar today. Do not think about meaning — think about sound.',
+  sc:`You are a Japanese shadowing coach. Say short phrases in Japanese (romaji in brackets). They repeat immediately copying the sound exactly. Give feedback on rhythm and pitch. Also drill fillers — ask questions requiring them to use えーと or そうですね before answering. Focus entirely on prosody.`},
+
+  {w:1,n:'四',t:'Question Machine',jp:'質問マシン',s:'45 min · Ask your way through anything',
+  task:'Questions are your lifeline. A tourist who can ask questions survives anything. Master 5 question words plus the pattern [topic]は[question word]ですか. Spend 35 minutes asking questions about everything across 3 scenarios. The AI answers in Japanese and you must ask a follow-up every time.',
+  phrases:[{j:'〜はどこですか？',r:'~ wa doko desu ka?',e:'Where is ~?'},
+  {j:'〜はいくらですか？',r:'~ wa ikura desu ka?',e:'How much is ~?'},
+  {j:'〜はなんですか？',r:'~ wa nan desu ka?',e:'What is ~?'},
+  {j:'〜はいつですか？',r:'~ wa itsu desu ka?',e:'When is ~?'},
+  {j:'どうやっていきますか？',r:'Dō yatte ikimasu ka?',e:'How do I get there?'}],
+  crit:'Ask 15 different questions across 3 scenarios without repeating the same structure twice in a row. Show you understood each answer.',
+  dont:'Do not worry about answers today — only questions. Do not use the same question word more than 4 times.',
+  sc:`You are a Japanese local with information the learner needs. Three situations: 1) lost near a station, 2) in a restaurant needing information, 3) at a temple. Answer their Japanese questions naturally (with romaji). If they speak English, respond in Japanese only. Encourage follow-up questions. Count questions and report at end.`},
+
+  {w:1,n:'五',t:'Speak Your Day',jp:'一日を話す',s:'45 min · Narrate your actual life',
+  task:'Speak about your real day in Japanese for 45 minutes — what you did this morning, what you\'re thinking about, your Japan plans. When you hit a word you don\'t know, describe around it. The AI will supply missing vocabulary naturally. This trains thinking in Japanese rather than translating from English.',
+  phrases:[{j:'けさ、〜しました',r:'Kesa, ~ shimashita',e:'This morning I ~ (past)'},
+  {j:'あとで〜するつもりです',r:'Ato de ~ suru tsumori desu',e:'Later I plan to ~'},
+  {j:'〜がすきです',r:'~ ga suki desu',e:'I like ~'},
+  {j:'じつは…',r:'Jitsu wa…',e:'Actually… — great sentence opener'}],
+  crit:'Speak for 40 minutes about your own life. You recover from word gaps without going silent. At least 3 different sentence structures used.',
+  dont:'Do not plan what to say. Do not look anything up. Do not stop when you hit an unknown word.',
+  sc:`Warm conversational Japanese about their daily life. They\'ll tell you about their day and life. Respond naturally, ask follow-ups, weave in correct vocabulary when they describe-around missing words. Keep them talking — if quiet, ask それから？ or どうでしたか？ Sustained output is the goal.`},
+
+  {w:1,n:'六',t:'Survive a Meal',jp:'食事を乗り越える',s:'45 min · Restaurant start to finish',
+  task:'Complete Japanese restaurant experience — arrival to paying — entirely in Japanese. Handle: being seated, ordering, questions about food, getting the bill. Run this twice: once at a casual ramen shop, once at a nicer restaurant with more formal register. No English at any point.',
+  phrases:[{j:'一人です / 二人です',r:'Hitori desu / Futari desu',e:'One / Two people'},
+  {j:'〜をひとつおねがいします',r:'~ o hitotsu onegai shimasu',e:'One ~ please'},
+  {j:'おすすめは何ですか？',r:'Osusume wa nan desu ka?',e:'What do you recommend?'},
+  {j:'おかいけいをおねがいします',r:'Okaikei o onegai shimasu',e:'The bill please'},
+  {j:'ごちそうさまでした',r:'Gochisōsama deshita',e:'Thank you for the meal — essential'}],
+  crit:'Complete both restaurant scenarios without English. Used ごちそうさまでした. Asked at least one question about food.',
+  dont:'Do not pre-script your lines. Do not use English even if you panic. Describe, point, but stay Japanese.',
+  sc:`Two restaurant role-plays back to back. First: casual ramen shop — friendly waiter, fast casual Japanese. Second: more formal restaurant — polite register. Handle everything: entering, ordering, questions, bill. Stay entirely in Japanese. If they use English, look confused. Give feedback after both.`},
+
+  {w:1,n:'七',t:'Free Flow',jp:'自由会話',s:'45 min · Week 1 assessment',
+  task:'No scenarios, no structure, no safety net. 45-minute free conversation in Japanese. Start with an introduction then go wherever it goes. Use fillers, ask questions, describe around gaps. The AI increases complexity as you warm up. This is your Week 1 assessment — did the freeze reflex break?',
+  phrases:[{j:'たとえば…',r:'Tatoeba…',e:'For example…'},
+  {j:'どうおもいますか？',r:'Dō omoimasu ka?',e:'What do you think?'},
+  {j:'むずかしいですね',r:'Muzukashii desu ne',e:'It\'s difficult, isn\'t it'},
+  {j:'もっとゆっくりおねがいします',r:'Motto yukkuri onegai shimasu',e:'Slower please'}],
+  crit:'45 minutes, Japanese only. You spoke more than you were silent. 5+ questions asked. Recovered from 3+ stuck moments without freezing.',
+  dont:'No English. No prep. No notes. Get stuck in Japanese and unstick yourself in Japanese.',
+  sc:`Free Japanese conversation with a British man in his early 40s preparing for Japan in October. He has Greek heritage, likes music, film photography, wellness. Chat naturally — ask about his life and Japan plans. Gently correct serious errors with あ、〜ですね then the correct form. Increase complexity gradually. If stuck, prompt with どういう意味ですか？`},
+
+  {w:2,n:'八',t:'Verb Engine',jp:'動詞エンジン',s:'45 min · 20 core verbs in all tenses',
+  task:'20 high-frequency verbs cover most of what you need to say. Today drill them in present, past, and negative — out loud, in sentences, from situations. No conjugation tables. The AI gives you a situation, you produce the verb form spontaneously. Automatic production is the goal, not recognition.',
+  phrases:[{j:'たべます/たべました/たべません',r:'Tabemasu/Tabemashita/Tabemasen',e:'eat / ate / don\'t eat'},
+  {j:'いきます/いきました/いきません',r:'Ikimasu/Ikimashita/Ikimasen',e:'go / went / don\'t go'},
+  {j:'します/しました/しません',r:'Shimasu/Shimashita/Shimasen',e:'do / did / don\'t do'},
+  {j:'あります/ありました/ありません',r:'Arimasu/Arimashita/Arimasen',e:'there is / there was / there isn\'t'}],
+  crit:'20 situations requiring different verbs and tenses. Correct verb form in full sentence within 4 seconds. 16/20 correct.',
+  dont:'Do not recite conjugation patterns. Do not think about rules — think about the situation. No writing.',
+  sc:`Drill verb conjugation through situational prompts only. Say a situation in English, wait for their Japanese response. Right: いい！ and immediately next. Wrong: say correct sentence once, have them repeat, move on. Keep score. 20 situations in 30 minutes. Never explain grammar rules.`},
+
+  {w:2,n:'九',t:'Particle Power',jp:'助詞マスター',s:'45 min · は が を に で の',
+  task:'Particles are the skeleton of Japanese. Six particles cover almost everything. Today you don\'t study them — you use them under correction. The AI flags every particle error in real time. Your job: keep talking, accept the correction, immediately redo the sentence. 40 minutes builds faster particle intuition than any textbook.',
+  phrases:[{j:'〜は〜です',r:'~ wa ~ desu',e:'は marks the topic'},
+  {j:'〜がすきです',r:'~ ga suki desu',e:'が marks subject in feeling expressions'},
+  {j:'〜をたべます',r:'~ o tabemasu',e:'を marks direct object'},
+  {j:'〜にいきます',r:'~ ni ikimasu',e:'に marks destination or time'},
+  {j:'〜でたべます',r:'~ de tabemasu',e:'で marks location of action'}],
+  crit:'30-min conversation. Particle error rate visibly drops from start to finish. You self-correct at least 5 times.',
+  dont:'Do not study a particle chart. Use particles and get corrected. Rules follow use.',
+  sc:`Natural Japanese conversation while acting as a particle error detector. Wrong particle: immediately say あ、〜[correct]ですね and continue — never stop the conversation. They must repeat the correction before moving on. Talk about travel and interests. End with assessment: which particles are solid, which need Week 3 work.`},
+
+  {w:2,n:'十',t:'Past & Future',jp:'過去と未来',s:'45 min · Time expressions and tense switching',
+  task:'Today master talking across time — past, present, future — with time expressions and verb tenses together. The AI pulls you between time periods constantly. You must switch fluidly. Time expressions are your anchors when tense goes wrong.',
+  phrases:[{j:'きのう/きょう/あした',r:'Kinō / Kyō / Ashita',e:'Yesterday / Today / Tomorrow'},
+  {j:'せんしゅう/らいしゅう',r:'Senshū / Raishū',e:'Last week / Next week'},
+  {j:'〜つもりです',r:'~ tsumori desu',e:'I intend to ~'},
+  {j:'〜たことがあります',r:'~ ta koto ga arimasu',e:'I have experienced ~ before'},
+  {j:'〜ているところです',r:'~ te iru tokoro desu',e:'I am in the middle of ~ing'}],
+  crit:'30-min conversation moving fluidly between past, present and future when prompted. At least 3 time expressions used naturally.',
+  dont:'Do not focus on perfect verb endings first — get the time expression out. Time expression + approximate verb beats correct verb + no time marker.',
+  sc:`Time-travel conversation — pull the learner between different time zones constantly. Ask about last weekend, Japan trip plans, what they\'re doing right now, past experiences, first day in Tokyo. Switch time period every 2-3 exchanges. Correct tense errors by modelling right form. Use それで？ to keep them talking.`},
+
+  {w:2,n:'十一',t:'Describe Around It',jp:'言えない時',s:'45 min · Circumlocution — the fluency lifesaver',
+  task:'Every fluent speaker learned to describe around vocabulary gaps. Today you train circumlocution — explaining concepts without the word. The AI asks you to explain English words in Japanese. You cannot say the English word. Describe what it does, looks like, when you use it. This is the single skill that keeps conversations alive when vocabulary fails.',
+  phrases:[{j:'〜みたいなものです',r:'~ mitai na mono desu',e:'It\'s like a ~ / a kind of ~'},
+  {j:'〜するときに使います',r:'~ suru toki ni tsukaimasu',e:'You use it when ~'},
+  {j:'〜の反対です',r:'~ no hantai desu',e:'It\'s the opposite of ~'},
+  {j:'えーと、なんていうんだろう…',r:'Ēto, nan te iun darō…',e:'Hmm, how do I say it… (think aloud)'}],
+  crit:'Describe 10 English words in Japanese without saying the English word. AI correctly guesses 7/10.',
+  dont:'Do not use English words. Do not go silent. If completely stuck, describe the physical object or when it\'s used.',
+  sc:`Japanese word-guessing game. Give an English word, ask them to explain it in Japanese without using the word. Try to guess. Start easy (camera, restaurant) get harder (nervous, coincidence, recommend). If stuck: どんなものですか？ Keep score and announce at end.`},
+
+  {w:2,n:'十二',t:'Numbers & Money',jp:'数字とお金',s:'45 min · 1 to 10,000 plus prices and time',
+  task:'Numbers in Japan are non-negotiable. Prices, train platforms, floor numbers, times — you need them instantly. Learn to say any number to 10,000, tell the time, say dates, and handle prices. Then drill: the AI calls random numbers, prices, and times until it\'s automatic.',
+  phrases:[{j:'いち に さん し ご ろく なな はち きゅう じゅう',r:'Ichi ni san shi go roku nana hachi kyū jū',e:'1–10'},
+  {j:'ひゃく/せん/まん',r:'Hyaku / Sen / Man',e:'100 / 1,000 / 10,000'},
+  {j:'〜えんです',r:'~ en desu',e:'It\'s ~ yen'},
+  {j:'〜じ〜ふんです',r:'~ ji ~ fun desu',e:'It\'s ~ o\'clock ~ minutes'}],
+  crit:'20 random numbers, prices, and times called out. You say them in Japanese within 3 seconds. 17/20 correct.',
+  dont:'Do not write numbers down. Do not count visibly. Numbers must come instantly.',
+  sc:`Rapid-fire number drills. Call a number, price (¥12,800), time (3:45pm), date (October 15th), wait for Japanese response. Right: immediately next. Wrong: correct once and move on. 20 drills in 25 min, then 10-min shopping role-play where prices come up naturally.`},
+
+  {w:2,n:'十三',t:'Opinions & Feelings',jp:'意見と気持ち',s:'45 min · Express nuance beyond すきです',
+  task:'Most learners can say すきです and おいしい. Today go further: nuance, preferences, degrees, opinions. ちょっと (a little), かなり (quite), とても (very), まあまあ (so-so). Express opinions on real things: Japan plans, food, places, experiences. Opinions make you sound like a person, not a phrasebook.',
+  phrases:[{j:'〜はちょっと苦手です',r:'~ wa chotto nigate desu',e:'I\'m not great with ~ (polite dislike)'},
+  {j:'〜はかなりすきです',r:'~ wa kanari suki desu',e:'I quite like ~'},
+  {j:'〜とおもいます',r:'~ to omoimasu',e:'I think that ~'},
+  {j:'まあまあです',r:'Māmā desu',e:'So-so / Not bad'},
+  {j:'〜はどうですか？',r:'~ wa dō desu ka?',e:'What do you think of ~?'}],
+  crit:'10 different opinions about 5 topics using at least 4 different opinion structures. AI confirms opinions are clear and natural.',
+  dont:'Do not use only すきです/きらいです. Give a reason after every opinion.',
+  sc:`Opinionated conversation — keep asking for views on things. Ask about Japan plans, food, music, what they\'re nervous about, Japanese culture. After each answer probe: なぜですか？ どんな〜がすきですか？ Model richer expressions when theirs are thin.`},
+
+  {w:2,n:'十四',t:'Week 2 Review',jp:'週間復習',s:'45 min · Full structure stress test',
+  task:'Week 2 built the engine: verbs, particles, tenses, numbers, opinions. Today tests whether it stuck. 45 minutes of free conversation covering all of it naturally: past experiences, future plans, describing gaps, opinions with reasons, numbers. No drills — just talk and see what comes.',
+  phrases:[{j:'じつは、〜たことがあります',r:'Jitsu wa, ~ ta koto ga arimasu',e:'Actually, I have ~ before'},
+  {j:'〜かどうかわかりません',r:'~ ka dō ka wakarimasen',e:'I don\'t know whether ~'},
+  {j:'〜によっては〜です',r:'~ ni yotte wa ~ desu',e:'Depending on ~, it\'s ~'}],
+  crit:'45-min conversation. Past/present/future tense used correctly in context. At least one number handled. 3+ opinions with reasons. No freezing.',
+  dont:'Do not review notes before this. Do not look anything up. This tests what stuck, not what you can read.',
+  sc:`Week 2 review — wide-ranging natural conversation covering past experiences (past tense), Japan trip plans (future), opinions on food/music/travel, any numbers that arise naturally. Silently track: tense accuracy, particle use, opinion expressions, number handling. At end: honest 2-minute assessment — what\'s strong, what needs Week 3 work.`},
+
+  {w:3,n:'十五',t:'Getting Around',jp:'交通と移動',s:'45 min · Trains, taxis, directions',
+  task:'Japan transport is world-class but linguistically demanding. Today: buy a train ticket, ask which platform, ask how many stops, take a taxi and give directions, ask for help when lost. Two full simulations then 15 minutes of navigation questions.',
+  phrases:[{j:'〜まで一枚おねがいします',r:'~ made ichimai onegai shimasu',e:'One ticket to ~ please'},
+  {j:'何番線ですか？',r:'Nanban-sen desu ka?',e:'Which platform?'},
+  {j:'〜はどこで乗り換えますか？',r:'~ wa doko de norikaemasu ka?',e:'Where do I transfer for ~?'},
+  {j:'まっすぐいって、右に曲がってください',r:'Massugu itte, migi ni magatte kudasai',e:'Go straight, turn right'}],
+  crit:'Complete: buy train ticket, navigate a transfer, give taxi directions. All in Japanese.',
+  dont:'Do not look up station names mid-scenario. Use known Tokyo stations or describe your destination.',
+  sc:`Japanese transport simulations. 1: JR ticket office — buy a ticket to Kyoto, find platform, ask about shinkansen. 2: taxi driver — direct you to hotel in Shinjuku using landmarks. 3: lost near Shibuya — ask a local how to reach a landmark. Natural pace throughout. Give feedback after all three.`},
+
+  {w:3,n:'十六',t:'Food Deep Dive',jp:'食べ物と飲み物',s:'45 min · Beyond ordering',
+  task:'You can order. Week 3 goes further: dietary preferences, allergies, asking what\'s in a dish, recommending dishes, izakaya ordering. Izakaya Japanese is fast, casual, and group-oriented — very different from formal restaurant Japanese. You need both.',
+  phrases:[{j:'〜は入っていますか？',r:'~ wa haitte imasu ka?',e:'Does it contain ~?'},
+  {j:'〜なしでおねがいします',r:'~ nashi de onegai shimasu',e:'Without ~ please'},
+  {j:'からくないですか？',r:'Karaku nai desu ka?',e:'Is it spicy?'},
+  {j:'とりあえず、ビールで',r:'Toriaezu, bīru de',e:'For now, a beer — classic izakaya opener'},
+  {j:'おかわりください',r:'Okawari kudasai',e:'Another one please'}],
+  crit:'Full izakaya session: drinks, questions about dishes, food order, refills, bill. Plus one dietary restriction scenario handled correctly.',
+  dont:'Do not just point and say ください. Use full sentences and questions.',
+  sc:`Food scenarios. First: izakaya — enthusiastic fast casual server, push specials, handle a group order. Second: they have an allergy (shellfish) and need to check dishes at a ramen shop. Third: they recommend a dish to you from imagined Japan experience. Izakaya energy — fast, fun, loud.`},
+
+  {w:3,n:'十七',t:'Shopping',jp:'買い物',s:'45 min · Konbini to department store',
+  task:'Japan is a shopping culture. Today: convenience store transactions, asking for sizes and colours in a clothing shop, tax-free shopping, and politely declining when shop assistants hover. Three complete shopping scenarios.',
+  phrases:[{j:'〜のMサイズはありますか？',r:'~ no M saizu wa arimasu ka?',e:'Do you have this in size M?'},
+  {j:'ほかの色はありますか？',r:'Hoka no iro wa arimasu ka?',e:'Do you have other colours?'},
+  {j:'これにします',r:'Kore ni shimasu',e:'I\'ll take this one'},
+  {j:'免税できますか？',r:'Menzei dekimasu ka?',e:'Can I get tax-free?'},
+  {j:'みているだけです',r:'Mite iru dake desu',e:'I\'m just looking'}],
+  crit:'Three scenarios: konbini purchase, clothing shop with size/colour questions, tax-free request. All in Japanese.',
+  dont:'Do not just point at things. Use full questions. The point of practice is language, not efficiency.',
+  sc:`Shopping simulations. 1: konbini — buy items, total comes up, slight confusion about loyalty card. 2: clothing store — specific item needed in different size and colour, need to check the back. 3: electronics store — is this tax-free, need passport form explained. Realistic Japanese retail: polite, slightly fast, set phrases.`},
+
+  {w:3,n:'十八',t:'Hotels',jp:'宿泊',s:'45 min · Business hotel and ryokan',
+  task:'Check in and out, request things from reception, handle a problem. Cover both a business hotel and a traditional ryokan. The ryokan uses more formal register — spend more time there.',
+  phrases:[{j:'チェックインおねがいします',r:'Chekku in onegai shimasu',e:'I\'d like to check in'},
+  {j:'予約した〜です',r:'Yoyaku shita ~ desu',e:'I have a reservation under ~'},
+  {j:'〜をもっといただけますか？',r:'~ o motto itadakemasu ka?',e:'Could I have more ~? (formal)'},
+  {j:'部屋を替えてもらえますか？',r:'Heya o kaete moraemasu ka?',e:'Could you change my room?'},
+  {j:'朝食は何時からですか？',r:'Chōshoku wa nanji kara desu ka?',e:'What time does breakfast start?'}],
+  crit:'Check in and out of both hotel and ryokan in Japanese. Handle one problem at each. Four interactions total.',
+  dont:'Do not accept hotel English. Stay in Japanese even if the receptionist offers to switch.',
+  sc:`Hotel simulations. 1: Tokyo business hotel — helpful receptionist, room type not ready for 30 minutes, can they wait? 2: Kyoto ryokan — very formal, no English, formal kimono-wearing staff. Learner checks in, gets onsen and meal time instructions, discovers futon issue. Formal Japanese throughout for ryokan. Feedback at end.`},
+
+  {w:3,n:'十九',t:'Health & Emergencies',jp:'健康と緊急',s:'45 min · Pharmacy, doctor, lost/stolen',
+  task:'These are the situations where language failure has real consequences. Describe symptoms, explain an allergy, handle lost wallet or phone. Today practise until you\'re confident, not just until you\'re done.',
+  phrases:[{j:'〜がいたいです',r:'~ ga itai desu',e:'My ~ hurts'},
+  {j:'熱があります',r:'Netsu ga arimasu',e:'I have a fever'},
+  {j:'〜アレルギーがあります',r:'~ arerugī ga arimasu',e:'I have a ~ allergy'},
+  {j:'財布をなくしました',r:'Saifu o nakushimashita',e:'I\'ve lost my wallet'},
+  {j:'警察を呼んでください',r:'Keisatsu o yonde kudasai',e:'Please call the police'}],
+  crit:'Handle: pharmacy with symptoms, allergy disclosure, lost item report at a koban. All clear enough to get real help.',
+  dont:'Do not rush. Practise until confident. These situations require precision.',
+  sc:`Emergency and health simulations. 1: pharmacy — headache and stomach ache, pharmacist asks about symptoms and allergies. 2: lost camera on a train — report at lost property. 3: explain nut allergy at doctor. Be empathetic but realistic. Correct critical communication errors immediately — these are high stakes.`},
+
+  {w:3,n:'二十',t:'Social Japanese',jp:'社交の日本語',s:'45 min · Small talk and human connection',
+  task:'Tourists who can do social Japanese — compliment, joke gently, show genuine curiosity — have a completely different experience of Japan. Today: small talk openers, complimenting, talking about your home country, expressing curiosity about Japanese culture. The goal is warmth, not function.',
+  phrases:[{j:'日本語がお上手ですね',r:'Nihongo ga ojōzu desu ne',e:'Your Japanese is excellent (they\'ll say this — respond humbly)'},
+  {j:'いいえ、まだまだです',r:'Iie, madamada desu',e:'No, I still have a long way to go'},
+  {j:'日本の文化がとても好きです',r:'Nihon no bunka ga totemo suki desu',e:'I love Japanese culture'},
+  {j:'〜はどうですか、日本では？',r:'~ wa dō desu ka, Nihon de wa?',e:'How is ~ in Japan? (curiosity opener)'}],
+  crit:'30-minute social conversation. Not about tasks — human connection. You made the AI laugh or express genuine surprise at least once.',
+  dont:'Do not treat this as a language lesson. Treat it as talking to a person.',
+  sc:`Japanese person genuinely delighted a foreigner speaks Japanese. Be warm and curious — ask about their life, interests, impressions of Japan. Share things about your own life. Have opinions. Be excited. Be curious about Greek heritage vs Japanese culture. If they compliment your English, respond naturally in Japanese. This should feel like real human connection.`},
+
+  {w:3,n:'二十一',t:'Full Japan Day',jp:'フィールドテスト',s:'45 min · Seven situations in sequence',
+  task:'Simulate a complete day in Japan: morning hotel checkout, train to a temple, lunch, shopping, pharmacy stop, back to hotel with a complaint. Seven situations, all Japanese, no breaks between. This is as close to real Japan as you can get from your phone.',
+  phrases:[{j:'〜に行きたいのですが',r:'~ ni ikitai no desu ga',e:'I\'d like to go to ~ (soft, natural)'},
+  {j:'〜はどれくらいかかりますか？',r:'~ wa dorekurai kakarimasu ka?',e:'How long does ~ take?'},
+  {j:'ありがとうございました',r:'Arigatō gozaimashita',e:'Thank you (past — for completed service)'}],
+  crit:'All 7 situations without English. Imperfect is fine — communicate successfully enough to be understood.',
+  dont:'No English. No looking things up mid-scenario. Stay Japanese through every situation.',
+  sc:`Full-day simulation — play all 7 roles in sequence: 1) hotel checkout, 2) train station to Asakusa, 3) brief temple guide, 4) ramen waiter, 5) souvenir shop, 6) pharmacy (mild headache), 7) hotel check-in with TV problem. Switch with brief "Next:" announcement. Realistic and appropriately fast. Honest score and assessment at end.`},
+
+  {w:4,n:'二十二',t:'Speed Drill',jp:'スピードドリル',s:'45 min · No pausing, no thinking time',
+  task:'You have the material. Week 4 is about speed and automaticity under pressure. Maximum 2 seconds to respond. No fillers longer than えーと. The AI increases speed gradually. If you freeze for more than 3 seconds, it moves on. This is uncomfortable. That is the point.',
+  phrases:[{j:'はい/いいえ',r:'Hai / Iie',e:'Yes / No — sometimes the fastest answer wins'},
+  {j:'そうです',r:'Sō desu',e:'That\'s right — confirm fast'},
+  {j:'ちがいます',r:'Chigaimasu',e:'That\'s wrong / No'}],
+  crit:'30-minute rapid-fire session. Average response under 3 seconds. Froze completely (no response) fewer than 3 times.',
+  dont:'Do not think before speaking. Do not translate. Aim for fast, not correct. Correct follows fast.',
+  sc:`High-pressure speed drill. Questions and statements in Japanese, maximum 3-second wait. No response: 次！ and move on immediately. Start normal pace, increase every 5 minutes. Any topic. Rule: no waiting, no repeating unless they say もう一度, no explaining. Pure speed. Report approximate average response time and 次！ count at end.`},
+
+  {w:4,n:'二十三',t:'Curveballs',jp:'予期しない状況',s:'45 min · Unprepared and unrehearsed',
+  task:'Real Japan will surprise you. Today the AI throws unpredictable situations with no warning. You haven\'t rehearsed them. Handle them using everything you know. No scenario is announced in advance. You will be dropped mid-situation and must figure out what\'s happening.',
+  phrases:[{j:'すみません、どういう意味ですか？',r:'Sumimasen, dō iu imi desu ka?',e:'Sorry, what does that mean?'},
+  {j:'もうすこしゆっくりおねがいします',r:'Mō sukoshi yukkuri onegai shimasu',e:'A little slower please'},
+  {j:'〜ということですか？',r:'~ to iu koto desu ka?',e:'Do you mean ~? (checking understanding)'}],
+  crit:'Handle 6 surprise situations. Successfully communicate to resolve each one. 5/6 resolved.',
+  dont:'Do not ask what the scenario is. Do not plan. React as you would in real Japan.',
+  sc:`Throw curveball situations with no warning — just start each one mid-flow. Examples: train delayed and you\'re explaining alternatives; stranger asks them to take a photo; shop assistant says there\'s a card problem; fellow diner wants to share their table; taxi driver says road is blocked; ryokan explaining onsen rules. Natural pace. After each resolves, briefly explain what it was and the key language, then start next one with no warning.`},
+
+  {w:4,n:'二十四',t:'Fast Japanese',jp:'速い日本語',s:'45 min · Natural speech rate training',
+  task:'Textbook Japanese is slow. Real Japanese is fast, contracted, with dropped sounds. Today the AI speaks at full natural speed with natural contractions: じゃない not ではない, てる not ている. Comprehend and respond. If you miss something, use your repair strategies. This is as close to landing at Narita as you can get.',
+  phrases:[{j:'じゃない/じゃなくて',r:'Ja nai / Ja nakute',e:'Contraction of ではない — isn\'t'},
+  {j:'てる/てた',r:'Teru / Teta',e:'Contraction of ている/ていた'},
+  {j:'〜っけ？',r:'~ kke?',e:'Wasn\'t it ~? — casual confirmation'},
+  {j:'わかった',r:'Wakatta',e:'Got it / Understood — casual'}],
+  crit:'30-minute conversation at natural speech rate. Understood at least 70% (self-assessed). Used repair strategies when lost.',
+  dont:'Do not ask to slow down unless completely lost. Listen for meaning, not individual words.',
+  sc:`Speak at full natural Japanese speed with casual contractions. じゃない, てる, drop syllables as natural speakers do. If they ask to repeat: do it once at same speed. If they ask slower: slow 20% only. After 30 minutes, honestly assess what percentage of exchanges they truly understood vs guessed from context.`},
+
+  {w:4,n:'二十五',t:'Talk About Japan',jp:'日本について話す',s:'45 min · Culture, history, daily life',
+  task:'The best Japan conversations will be about Japan itself. Today discuss Japanese culture in Japanese: seasonal customs, food culture, contemporary life, things you\'re curious about. Japanese people are moved when a foreigner knows and cares about their culture. This is how you go from tourist to guest.',
+  phrases:[{j:'〜について教えてください',r:'~ ni tsuite oshiete kudasai',e:'Please tell me about ~'},
+  {j:'日本では〜が多いですね',r:'Nihon de wa ~ ga ōi desu ne',e:'In Japan there\'s a lot of ~'},
+  {j:'それはイギリスとちがいますね',r:'Sore wa Igirisu to chigaimasu ne',e:'That\'s different from the UK'},
+  {j:'〜はいつごろはじまったんですか？',r:'~ wa itsu goro hajimattan desu ka?',e:'About when did ~ start?'}],
+  crit:'35-minute conversation about Japanese culture. At least 5 curiosity questions. Show you know at least 3 things about Japan beyond food.',
+  dont:'Do not just ask about food. Ask about seasonal customs, social norms, what young Japanese people think.',
+  sc:`Japanese person who loves talking about Japan with curious foreigners. Discuss: seasonal customs (cherry blossom, obon, new year), food culture beyond sushi (konbini culture, izakaya etiquette, regional food), daily life (trains, neighbourhood culture), and whatever they bring up. Have your own opinions. Get excited. Share what\'s changing in Japan. Best conversation a tourist has ever had.`},
+
+  {w:4,n:'二十六',t:'Your October Trip',jp:'旅程を話す',s:'45 min · Your actual Japan plans in Japanese',
+  task:'Talk about your real Japan trip in Japanese — where you\'re going, when, why those places, what you want to experience, what you\'re nervous about. Personal language sticks better than imagined scenarios. The AI asks follow-up questions and helps you build vocabulary specific to your actual trip.',
+  phrases:[{j:'〜に泊まるつもりです',r:'~ ni tomaru tsumori desu',e:'I\'m planning to stay in ~'},
+  {j:'〜が楽しみです',r:'~ ga tanoshimi desu',e:'I\'m looking forward to ~'},
+  {j:'〜が少し心配です',r:'~ ga sukoshi shinpai desu',e:'I\'m a little worried about ~'},
+  {j:'〜をぜひやってみたいです',r:'~ o zehi yatte mitai desu',e:'I really want to try ~'}],
+  crit:'Describe your real itinerary in Japanese for 35+ minutes. AI can summarise your trip back accurately. Pass = AI got it right.',
+  dont:'Do not use hypothetical plans. Use your real October trip. Personal language sticks.',
+  sc:`Knowledgeable Japanese person helping plan a British visitor\'s October trip. He\'ll tell you his plans in Japanese. Listen, ask follow-ups (どのくらい滞在しますか？, どんなものが食べたいですか？), make suggestions based on his interests in music, photography, wellness. At end, summarise his trip back in Japanese to confirm you understood. Leave him excited and confident.`},
+
+  {w:4,n:'二十七',t:'Stress Test',jp:'ストレステスト',s:'45 min · Maximum pressure simulation',
+  task:'The hardest session. Rapid role-plays with no time between them, unexpected complications in every scenario, the AI playing slightly impatient or confused Japanese people as happens in real life. No safety net. If you panic, use repair phrases. If you freeze, force a syllable and build from there. This is October.',
+  phrases:[{j:'すみません、もう一度おねがいできますか？',r:'Sumimasen, mō ichido onegai dekimasu ka?',e:'Could you say that again? (formal)'},
+  {j:'ちょっと待ってください',r:'Chotto matte kudasai',e:'Just a moment — buys 3 seconds'},
+  {j:'〜で合っていますか？',r:'~ de atte imasu ka?',e:'Is ~ correct? (checking yourself)'}],
+  crit:'8 rapid situations. No English. No freezing longer than 5 seconds. Getting things wrong is fine — stopping is not.',
+  dont:'No English. No asking for help outside Japanese. Act as if you\'re there.',
+  sc:`Maximum pressure simulation. 8 rapid situations with complications, no downtime: 1) train cancelled mid-journey, 2) restaurant 2-hour wait with alternatives, 3) wrong item at konbini and cashier confused, 4) taxi took wrong route, 5) ryokan says booking is tomorrow not today, 6) pharmacy can\'t find medicine, 7) very fast-talking elderly local stops them on street, 8) hotel room key doesn\'t work at 11pm. Play each as realistic — slightly harried, normal pace. No sympathy for language struggles.`},
+
+  {w:4,n:'二十八',t:'You\'re Ready',jp:'準備完了',s:'45 min · Final free conversation',
+  task:'Last session before October. No structure, no scenarios, no drills. Just talk. About Japan, your life, whatever feels natural. This is the proof of everything you\'ve built. At the end, the AI tells you honestly where you stand and what to keep doing before you fly.',
+  phrases:[{j:'日本語が上達しました',r:'Nihongo ga jōtatsu shimashita',e:'My Japanese has improved'},
+  {j:'まだまだですが、がんばります',r:'Madamada desu ga, ganbarimasu',e:'Still a long way to go, but I\'ll keep at it'},
+  {j:'たのしみにしています',r:'Tanoshimi ni shite imasu',e:'I\'m looking forward to it'}],
+  crit:'45 minutes of natural Japanese. You felt more comfortable than Day 1. You expressed something personal and complex. You\'re going to be fine in October.',
+  dont:'Do not review. Do not prepare. You\'ve done the work. Just talk.',
+  sc:`Final session of a 28-day programme. The learner flies to Japan in mid-October. Genuine warm conversation — excitement, preparation, what they\'re looking forward to. Be a real partner, not a tutor. After 35+ minutes, give honest assessment: what to be proud of, what to keep working on before October, one piece of advice for when they arrive. End with something encouraging in Japanese.`},
+];
+
+let curDay=0,curMode='lesson',chatHist=[],aiTyping=false,completedDays=[],showTI=false;
+let recog=null,listening=false,speaking=false;
+try{completedDays=JSON.parse(localStorage.getItem('jp_v3')||'[]')}catch(e){}
+function save(){try{localStorage.setItem('jp_v3',JSON.stringify(completedDays))}catch(e){}}
+
+function renderHome(){
+  const c=document.getElementById('wk-sections');c.innerHTML='';
+  const today=Math.min(completedDays.length,27);
+  WEEKS.forEach(wk=>{
+    const wdays=DAYS.filter(d=>d.w===wk.n);
+    const si=DAYS.findIndex(d=>d.w===wk.n);
+    const sec=document.createElement('div');sec.className='wk-sec';
+    sec.innerHTML=`<div class="wk-lbl">Week ${wk.n}<div class="wk-lbl-line"></div></div><div class="wk-desc">${wk.desc}</div><div class="day-list" id="wl${wk.n}"></div>`;
+    c.appendChild(sec);
+    const list=sec.querySelector(`#wl${wk.n}`);
+    wdays.forEach((d,wi)=>{
+      const i=si+wi,done=completedDays.includes(i),isT=i===today&&!done;
+      const card=document.createElement('div');
+      card.className=`dc${done?' done':''}${isT?' today':''}`;
+      card.innerHTML=`${isT?'<div class="today-pill">Today</div>':''}<div class="dn">${d.n}</div><div class="di"><div class="dt">${d.t}</div><div class="ds">${d.s}</div></div><div class="db ${done?'done-b':isT?'today-b':'lock-b'}">${done?'✓':isT?'GO':'·'}</div>`;
+      card.onclick=()=>openDay(i);list.appendChild(card);
+    });
+  });
+  document.getElementById('start-btn').onclick=()=>openDay(today);
+}
+
+function openDay(i){
+  curDay=i;curMode='lesson';chatHist=[];showTI=false;stopListen();
+  const d=DAYS[i];
+  document.getElementById('nav-title').textContent=`Day ${i+1} · ${d.t}`;
+  document.getElementById('lbtn').classList.add('active');
+  document.getElementById('pbtn').classList.remove('active');
+  renderLesson();showScreen('day-screen');
+}
+
+function renderLesson(){
+  const d=DAYS[curDay],done=completedDays.includes(curDay);
+  document.getElementById('day-content').innerHTML=`
+  <div class="lp">
+    <div class="lhero"><div class="lnum">${d.n}</div><div class="ltitle">${d.t}</div><div class="ljp">${d.jp}</div></div>
+    <div class="wtag">Week ${d.w}</div>
+    <div class="lb"><div class="blbl">Today's Task</div><div class="bbody">${d.task}</div></div>
+    <div class="lb"><div class="blbl">Key Phrases</div>${d.phrases.map(p=>`<div class="pc"><div class="pjp">${p.j}</div><div class="pr">${p.r}</div><div class="pen">${p.e}</div></div>`).join('')}</div>
+    <div class="lb"><div class="blbl">Pass Criterion</div><div class="crb"><div class="crt">${d.crit}</div><button class="crck${done?' ck':''}" onclick="toggleDone()">${done?'✓ Marked complete':'Mark as complete'}</button></div></div>
+    <div class="lb"><div class="blbl">Don't Do This Today</div><div class="dnb"><div class="dni">⛔</div><div class="dnt">${d.dont}</div></div></div>
+  </div>`;}
+
+function toggleDone(){if(!completedDays.includes(curDay))completedDays.push(curDay);save();renderLesson();}
+
+function switchMode(m){
+  curMode=m;
+  document.getElementById('lbtn').classList.toggle('active',m==='lesson');
+  document.getElementById('pbtn').classList.toggle('active',m==='speak');
+  if(m==='lesson'){stopListen();renderLesson();}else{chatHist=[];renderChat();}
+}
+
+function renderChat(){
+  const d=DAYS[curDay];
+  document.getElementById('day-content').innerHTML=`
+  <div class="chat-panel">
+    <div class="chat-bar"><div class="cdot"></div>Day ${curDay+1} · ${d.t} · Voice practice</div>
+    <div class="chat-msgs" id="cms">
+      <div class="msg sys">Tap the mic and speak in Japanese</div>
+      <div class="typing" id="typ"><div class="dot"></div><div class="dot"></div><div class="dot"></div></div>
+    </div>
+    <div class="vc">
+      <div class="vstatus" id="vst">Tap mic to speak</div>
+      <div class="vrow">
+        <button class="vtog" onclick="toggleTI()" id="titog">⌨ Type instead</button>
+        <button class="mic-btn" id="mic" onclick="handleMic()"><span class="mic-icon">🎤</span></button>
+        <button class="vtog" onclick="stopSpeak()" id="stopbtn" style="visibility:hidden">⏹ Stop</button>
+      </div>
+      <div id="tic" style="display:none;width:100%">
+        <div class="ti-row">
+          <textarea class="ci" id="ci" placeholder="Type in Japanese or English…" rows="1" onkeydown="hkey(event)" oninput="arz(this)"></textarea>
+          <button class="sb" id="sb" onclick="sendTxt()">↑</button>
+        </div>
+      </div>
+    </div>
+  </div>`;
+  startChat();
+}
+
+function toggleTI(){showTI=!showTI;document.getElementById('tic').style.display=showTI?'block':'none';document.getElementById('titog').textContent=showTI?'🎤 Voice only':'⌨ Type instead';}
+function hkey(e){if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();sendTxt();}}
+function arz(el){el.style.height='auto';el.style.height=Math.min(el.scrollHeight,80)+'px';}
+
+function handleMic(){if(speaking){stopSpeak();return;}if(listening){stopListen();return;}startListen();}
+
+function startListen(){
+  const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
+  if(!SR){setVSt('Speech not supported — use text input','');toggleTI();return;}
+  recog=new SR();recog.lang='ja-JP';recog.continuous=false;recog.interimResults=false;
+  recog.onstart=()=>{listening=true;setMic('listening');setVSt('Listening…','ls');};
+  recog.onresult=(e)=>{const t=e.results[0][0].transcript;stopListen();addMsg('user',t);sendAI(t);};
+  recog.onerror=(e)=>{stopListen();if(e.error==='no-speech')setVSt('No speech — try again','');else if(e.error==='not-allowed'){setVSt('Mic access denied — use text','');toggleTI();}else setVSt('Error — try again','');};
+  recog.onend=()=>{if(listening)stopListen();};
+  try{recog.start();}catch(e){setVSt('Could not start mic','');}
+}
+
+function stopListen(){
+  listening=false;
+  if(recog){try{recog.stop();}catch(e){}recog=null;}
+  setMic('');if(!speaking)setVSt('Tap mic to speak','');
+}
+
+function speak(text){
+  if(!window.speechSynthesis)return;
+  window.speechSynthesis.cancel();
+  const u=new SpeechSynthesisUtterance(text);
+  const vx=window.speechSynthesis.getVoices();
+  const jv=vx.find(v=>v.lang.startsWith('ja'));
+  if(jv)u.voice=jv;u.lang='ja-JP';u.rate=0.85;u.pitch=1;
+  u.onstart=()=>{speaking=true;setMic('speaking');setVSt('Speaking…','sp');const s=document.getElementById('stopbtn');if(s)s.style.visibility='visible';};
+  u.onend=()=>{speaking=false;setMic('');setVSt('Tap mic to speak','');const s=document.getElementById('stopbtn');if(s)s.style.visibility='hidden';};
+  window.speechSynthesis.speak(u);
+}
+
+function stopSpeak(){window.speechSynthesis.cancel();speaking=false;setMic('');setVSt('Tap mic to speak','');const s=document.getElementById('stopbtn');if(s)s.style.visibility='hidden';}
+function setMic(st){const b=document.getElementById('mic');if(b)b.className=`mic-btn${st?' '+st:''}`;}
+function setVSt(t,c){const e=document.getElementById('vst');if(e){e.textContent=t;e.className=`vstatus${c?' '+c:''}`;};}
+
+function sysPrompt(d){
+  return `You are an expert Japanese conversation tutor. Learner: British man, early 40s, aiming for spoken fluency before Japan trip mid-October. Today is Day ${curDay+1} of 28.\n\nYour role: ${d.sc}\n\nRULES:\n- Responses MAX 3 sentences. This is voice on mobile.\n- Japanese: always write romaji immediately after in (brackets).\n- No grammar lectures mid-conversation.\n- One correction max per response.\n- Always end prompting them to respond.\n- If they freeze: give them the Japanese words and ask them to try.`;}
+
+async function startChat(){
+  const d=DAYS[curDay];showTyping(true);
+  try{
+    const r=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({model:'claude-sonnet-4-6',max_tokens:300,system:sysPrompt(d),messages:[{role:'user',content:'Start. Brief Japanese greeting then begin immediately.'}]})});
+    const data=await r.json();const txt=data.content?.[0]?.text||'こんにちは！始めましょう。';
+    chatHist.push({role:'user',content:'Start.'});chatHist.push({role:'assistant',content:txt});
+    showTyping(false);addMsg('ai',txt);speak(txt);
+  }catch(e){showTyping(false);const f='こんにちは！準備はいいですか？';addMsg('ai',f);speak(f);}
+}
+
+async function sendAI(ut){
+  if(aiTyping)return;aiTyping=true;showTyping(true);
+  chatHist.push({role:'user',content:ut});
+  const d=DAYS[curDay];const msgs=chatHist.length>10?chatHist.slice(-10):chatHist;
+  try{
+    const r=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({model:'claude-sonnet-4-6',max_tokens:300,system:sysPrompt(d),messages:msgs})});
+    const data=await r.json();const rep=data.content?.[0]?.text||'すみません、もう一度。';
+    chatHist.push({role:'assistant',content:rep});showTyping(false);addMsg('ai',rep);speak(rep);
+  }catch(e){showTyping(false);addMsg('ai','もう一度おねがいします。(Connection issue)');}
+  aiTyping=false;
+}
+
+async function sendTxt(){
+  const inp=document.getElementById('ci');if(!inp)return;
+  const t=inp.value.trim();if(!t||aiTyping)return;
+  inp.value='';inp.style.height='auto';addMsg('user',t);await sendAI(t);
+}
+
+function addMsg(role,text){
+  const m=document.getElementById('cms'),ty=document.getElementById('typ');if(!m)return;
+  const d=document.createElement('div');d.className=`msg ${role}`;d.textContent=text;
+  m.insertBefore(d,ty);m.scrollTop=m.scrollHeight;
+}
+
+function showTyping(s){const t=document.getElementById('typ');if(t)t.className=`typing${s?' vis':''}`;const m=document.getElementById('cms');if(m)m.scrollTop=m.scrollHeight;}
+
+function showScreen(id){document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));document.getElementById(id).classList.add('active');}
+
+document.getElementById('back-btn').onclick=()=>{stopListen();stopSpeak();showScreen('home');renderHome();};
+
+window.speechSynthesis.onvoiceschanged=()=>{};
+if('serviceWorker' in navigator)navigator.serviceWorker.register('sw.js').catch(()=>{});
+
+window.addEventListener('load',()=>{
+  const io=/iphone|ipad|ipod/.test(navigator.userAgent.toLowerCase());
+  if(io&&!window.navigator.standalone&&!localStorage.getItem('idm')){
+    const b=document.createElement('div');
+    b.style.cssText='position:fixed;bottom:0;left:0;right:0;background:#1c1c1c;border-top:1px solid #2e2e2e;padding:13px 16px calc(env(safe-area-inset-bottom,0px)+13px);z-index:9999;display:flex;align-items:center;gap:11px;font-family:Inter,sans-serif';
+    b.innerHTML='<div style="font-size:24px">流</div><div style="flex:1"><div style="font-size:13px;font-weight:600;color:#f7f4ef;margin-bottom:2px">Add to Home Screen</div><div style="font-size:11px;color:#9a9a9a">Tap <b style="color:#c0392b">Share ↑</b> then <b style="color:#c0392b">Add to Home Screen</b></div></div><button onclick="this.parentNode.remove();localStorage.setItem(\'idm\',1)" style="background:none;border:none;color:#9a9a9a;font-size:20px;cursor:pointer">✕</button>';
+    document.body.appendChild(b);
+  }
+});
+
+renderHome();
+</script>
+</body>
+</html>
